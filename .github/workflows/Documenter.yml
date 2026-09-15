@@ -1,0 +1,56 @@
+# Builds the documentation with Documenter.jl.
+#
+# - On pull requests: builds only, so broken docs show up before merging.
+# - On pushes to main and on version tags: builds and publishes to the gh-pages
+#   branch (see deploydocs in docs/make.jl).
+#
+# One-time setup after the first successful run on main:
+#   Settings → Pages → Build and deployment → Source: "Deploy from a branch",
+#   Branch: gh-pages, folder: / (root).
+# GitHub Pages for private repositories needs a paid GitHub plan; on a free plan
+# the gh-pages branch is still updated, but no website is published.
+
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+    tags: ["*"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write        # push the built site to the gh-pages branch
+  pull-requests: read
+  statuses: write        # report the docs build status on commits
+
+jobs:
+  docs:
+    name: Build and deploy documentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Install Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+
+      - name: Cache Julia packages
+        uses: julia-actions/cache@v2
+
+      - name: Install documentation dependencies
+        run: julia --project=docs -e 'import Pkg; Pkg.develop(Pkg.PackageSpec(path = pwd())); Pkg.instantiate()'
+
+      - name: Build and deploy
+        run: julia --project=docs docs/make.jl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
