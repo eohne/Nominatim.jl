@@ -1,6 +1,9 @@
 # Nominatim.jl
+[![Docs: stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://eohne.github.io/Nominatim.jl/stable/)
+[![Docs: dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://eohne.github.io/Nominatim.jl/dev/)
 [![CI](https://github.com/eohne/Nominatim.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/eohne/Nominatim.jl/actions/workflows/CI.yml)
 [![Online tests](https://github.com/eohne/Nominatim.jl/actions/workflows/OnlineTests.yml/badge.svg)](https://github.com/eohne/Nominatim.jl/actions/workflows/OnlineTests.yml)
+[![Documentation](https://github.com/eohne/Nominatim.jl/actions/workflows/Documenter.yml/badge.svg)](https://github.com/eohne/Nominatim.jl/actions/workflows/Documenter.yml)
 
 A readable Julia client for [Nominatim](https://nominatim.org/), the open-source
 geocoder built on OpenStreetMap data. Free, no API key.
@@ -83,6 +86,12 @@ results = geocode_batch(addresses; client, concurrent_requests = 12,
 ```
 
 ## Documentation
+
+The full documentation, including the API reference, is at
+**<https://eohne.github.io/Nominatim.jl/stable/>** (latest release) and
+**<https://eohne.github.io/Nominatim.jl/dev/>** (latest `main`).
+
+The pages can also be read directly in this repository:
 
 - [Getting started and match quality](docs/src/index.md)
 - [Bulk geocoding](docs/src/bulk.md)
