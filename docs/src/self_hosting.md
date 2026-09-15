@@ -662,33 +662,78 @@ wsl --shutdown
 wsl --manage Ubuntu-24.04 --move E:\WSL\Ubuntu-24.04
 ```
 
-### Getting disk space back on `C:` (untested)
+### Getting disk space back on `C:`
 
-The virtual disk file keeps its largest size. Exporting the distribution and
-importing it again writes a compact copy (you need room for the copy).
-`--unregister` **deletes** the distribution: only run it after the export
-finished without errors.
+The virtual disk file keeps its largest size. In the tested run it was 226 GB
+after the import while Linux used only 94 GB. Compacting it shrank the file to
+**95 GB** and freed **131 GB** on `C:` (*measured*), in about 15 minutes. The
+database passed `nominatim admin --check-database` afterwards.
 
-**PowerShell**, one command at a time:
+Stop the server first (A14). Optional but sensible: make a backup copy (about the
+size of the used space), and delete it once everything works again:
+
+```powershell
+wsl --export Ubuntu-24.04 "$env:USERPROFILE\ubuntu-nominatim-backup.tar"
+```
+
+**Ubuntu**, delete the download if it is still there:
+
+```bash
+rm -f ~/nominatim-project/us-latest.osm.pbf
+```
+
+**Ubuntu**, tell the virtual disk which space is empty (asks for your password):
+
+```bash
+sudo fstrim -av
+```
+
+Expected: a line like `/: 901.7 GiB (…) trimmed on /dev/sdd`. The large number is
+the empty part of the virtual disk's 1 TB maximum; nothing is deleted.
+
+**PowerShell**, close the Ubuntu window, then:
 
 ```powershell
 wsl --shutdown
 ```
 
-```powershell
-wsl --export Ubuntu-24.04 E:\backup\ubuntu-nominatim.tar
-```
+**PowerShell**, find the virtual disk file (copy the path it prints):
 
 ```powershell
-wsl --unregister Ubuntu-24.04
+(Get-ChildItem -Path HKCU:\Software\Microsoft\Windows\CurrentVersion\Lxss | Where-Object { $_.GetValue("DistributionName") -eq 'Ubuntu-24.04' }).GetValue("BasePath") + "\ext4.vhdx"
 ```
+
+**PowerShell as administrator** (right-click PowerShell → *Run as administrator*):
 
 ```powershell
-wsl --import Ubuntu-24.04 C:\WSL\Ubuntu-24.04 E:\backup\ubuntu-nominatim.tar
+diskpart
 ```
 
-Afterwards Ubuntu starts as `root`; set your user again by adding `[user]` and
-`default=yourname` to `/etc/wsl.conf`.
+At the `DISKPART>` prompt, type these one at a time, with your path in the first
+line:
+
+```
+select vdisk file="C:\Users\yourname\AppData\Local\wsl\{…}\ext4.vhdx"
+```
+
+```
+attach vdisk readonly
+```
+
+```
+compact vdisk
+```
+
+Wait for `DiskPart successfully compacted the virtual disk file.` Do not open
+Ubuntu meanwhile.
+
+```
+detach vdisk
+```
+
+```
+exit
+```
 
 ### Not using your own PC
 
