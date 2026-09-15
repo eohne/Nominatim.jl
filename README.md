@@ -1,5 +1,4 @@
 # Nominatim.jl
-[![Docs: stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://eohne.github.io/Nominatim.jl/stable/)
 [![Docs: dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://eohne.github.io/Nominatim.jl/dev/)
 [![CI](https://github.com/eohne/Nominatim.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/eohne/Nominatim.jl/actions/workflows/CI.yml)
 [![Online tests](https://github.com/eohne/Nominatim.jl/actions/workflows/OnlineTests.yml/badge.svg)](https://github.com/eohne/Nominatim.jl/actions/workflows/OnlineTests.yml)
