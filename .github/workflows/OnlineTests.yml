@@ -1,0 +1,54 @@
+# Runs the full test suite, including a few requests to the live public
+# Nominatim server.
+#
+# Kept separate from CI.yml because the outcome depends on an outside service.
+# Running it weekly warns us if Nominatim changes its API or response format.
+# It sends only a handful of requests, well within the usage policy.
+#
+# It runs:
+#   - every Monday at 06:00 UTC,
+#   - on every push to main,
+#   - on demand, from the "Actions" tab ("Run workflow").
+
+name: Online tests
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  online-test:
+    name: Live Nominatim tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Install Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: "1"
+
+      - name: Cache Julia packages
+        uses: julia-actions/cache@v2
+
+      - name: Install and precompile dependencies
+        uses: julia-actions/julia-buildpkg@v1
+
+      - name: Run all tests, including the live-server tests
+        uses: julia-actions/julia-runtest@v1
+        env:
+          NOMINATIM_ONLINE_TESTS: "true"

@@ -1,0 +1,66 @@
+# Runs the offline test suite on every push and pull request.
+#
+# These tests do not contact any Nominatim server (a small mock server stands in),
+# so they are fast and never fail because a service is slow or down. The
+# live-server tests are in OnlineTests.yml.
+
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    tags: ["*"]
+  pull_request:
+  workflow_dispatch:
+
+# If a new commit is pushed to the same branch or pull request, cancel the
+# run that is still going for the older commit.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Julia ${{ matrix.julia-version }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        julia-version:
+          - "1.10"   # the oldest version allowed in Project.toml
+          - "1"      # the newest released 1.x version
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+        exclude:
+          # Checking the oldest version on Linux alone is enough.
+          - julia-version: "1.10"
+            os: windows-latest
+          - julia-version: "1.10"
+            os: macos-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+
+      - name: Install Julia
+        uses: julia-actions/setup-julia@v2
+        with:
+          version: ${{ matrix.julia-version }}
+
+      - name: Cache Julia packages
+        uses: julia-actions/cache@v2
+
+      - name: Install and precompile dependencies
+        uses: julia-actions/julia-buildpkg@v1
+
+      - name: Run the offline tests
+        uses: julia-actions/julia-runtest@v1
+        env:
+          NOMINATIM_ONLINE_TESTS: "false"

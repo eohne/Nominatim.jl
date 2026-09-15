@@ -1,0 +1,22 @@
+# Manifest.toml pins exact dependency versions for one machine. A package
+# should not commit it: users and CI resolve versions from [compat] in Project.toml.
+Manifest.toml
+Manifest-v*.toml
+
+# Coverage and memory-allocation files produced by `Pkg.test(coverage = true)` etc.
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+lcov.info
+
+# Generated documentation
+docs/build/
+docs/Manifest.toml
+
+# Checkpoint files written by geocode_batch while experimenting locally
+*.checkpoint.jsonl
+
+# Editor and operating-system clutter
+.vscode/
+.DS_Store
+Thumbs.db
